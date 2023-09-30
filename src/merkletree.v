@@ -10,7 +10,7 @@ mut:
 }
 
 struct Node {
-	children []&Child [required] = []
+	children []Child [required] = []
 mut:
 	hash []u8 = []u8{}
 }
@@ -23,11 +23,11 @@ type Child = Block | Node
 
 [inline]
 pub fn (mut m MerkleTree) build(blocks [][]u8) {
-	mut leaves := []&Child{}
+	mut leaves := []Child{}
 
 	// create leaf nodes
 	for block in blocks {
-		leaves << &Node{
+		leaves << Node{
 			children: [Block{
 				value: block
 			}]
@@ -38,18 +38,18 @@ pub fn (mut m MerkleTree) build(blocks [][]u8) {
 }
 
 [inline]
-fn (mut m MerkleTree) process_nodes(nodes []&Child) {
+fn (mut m MerkleTree) process_nodes(nodes []Child) {
 	if 1 == nodes.len {
 		// root found
 		m.root = nodes[0] as Node
 		return
 	}
 
-	mut parents := []&Child{}
+	mut parents := []Child{}
 
 	// only create parent node from every m.branching_factor-th node and its siblings
 	for i := 0; i <= nodes.len - 1; i += m.branching_factor {
-		mut siblings := []&Child{}
+		mut siblings := []Child{}
 
 		// group nodes dependent on branching factor
 		for j := i; j < i + m.branching_factor; j++ {
@@ -63,7 +63,7 @@ fn (mut m MerkleTree) process_nodes(nodes []&Child) {
 		if 1 == siblings.len {
 			parents << siblings
 		} else {
-			parents << &Node{
+			parents << Node{
 				children: siblings
 			}
 		}
@@ -73,15 +73,14 @@ fn (mut m MerkleTree) process_nodes(nodes []&Child) {
 }
 
 [inline]
-fn (mut n Node) get_hash(hash_function HashFunction) []u8 {
+fn (n Node) get_hash(hash_function HashFunction) []u8 {
 	mut payload := []u8{}
 
 	if 1 == n.children.len {
 		// is this a leaf or a lonely node?
 		if n.children[0] is Node {
 			// lonely node -> avoid re-hashing
-			mut child := &(n.children[0] as Node)
-			return child.get_hash(hash_function)
+			return (n.children[0] as Node).get_hash(hash_function)
 		}
 
 		// prevent second preimage attacks
@@ -93,8 +92,7 @@ fn (mut n Node) get_hash(hash_function HashFunction) []u8 {
 
 		// create sum of child nodes
 		for child in n.children {
-			mut casted := &(child as Node)
-			payload << casted.get_hash(hash_function)
+			payload << (child as Node).get_hash(hash_function)
 		}
 	}
 
@@ -102,6 +100,6 @@ fn (mut n Node) get_hash(hash_function HashFunction) []u8 {
 }
 
 [inline]
-pub fn (mut m MerkleTree) get_root() []u8 {
+pub fn (m MerkleTree) get_root() []u8 {
 	return m.root.get_hash(m.hash_function)
 }
