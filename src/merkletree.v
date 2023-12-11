@@ -4,24 +4,24 @@ pub type HashFunction = fn (data []u8) []u8
 
 pub struct MerkleTree {
 	branching_factor int = 2
-	hash_function    HashFunction [required]
+	hash_function    HashFunction @[required]
 mut:
 	root Node
 }
 
 struct Node {
-	children []Child [required] = []
+	children []Child @[required]
 mut:
 	hash []u8 = []u8{}
 }
 
 struct Block {
-	value []u8 [required]
+	value []u8 @[required]
 }
 
 type Child = Block | Node
 
-[inline]
+@[inline]
 pub fn (mut m MerkleTree) build(blocks [][]u8) {
 	mut leaves := []Child{}
 
@@ -37,7 +37,7 @@ pub fn (mut m MerkleTree) build(blocks [][]u8) {
 	m.process_nodes(leaves)
 }
 
-[inline]
+@[inline]
 fn (mut m MerkleTree) process_nodes(nodes []Child) {
 	if 1 == nodes.len {
 		// root found
@@ -72,7 +72,7 @@ fn (mut m MerkleTree) process_nodes(nodes []Child) {
 	m.process_nodes(parents)
 }
 
-[inline]
+@[inline]
 fn (n Node) get_hash(hash_function HashFunction) []u8 {
 	mut payload := []u8{}
 
@@ -99,7 +99,7 @@ fn (n Node) get_hash(hash_function HashFunction) []u8 {
 	return hash_function(payload)
 }
 
-[inline]
+@[inline]
 pub fn (m MerkleTree) get_root() []u8 {
 	return m.root.get_hash(m.hash_function)
 }
