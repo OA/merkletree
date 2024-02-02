@@ -10,7 +10,7 @@ mut:
 }
 
 struct Node {
-	children []Child @[required]
+	children []Child @[required] = []
 mut:
 	hash []u8 = []u8{}
 }
