@@ -8,6 +8,12 @@ Lightweight library that lets you create Merkle trees with custom branching fact
 
 The library supports all hashing algorithms native to V out of the box.
 
+You can also use custom hashing algorithms that are implemented according to the interface.
+
+```v
+pub type HashFunction = fn (data []u8) []u8
+```
+
 ## :bulb: Interface
 
 ```v
